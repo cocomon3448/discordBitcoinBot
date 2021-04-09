@@ -2,7 +2,8 @@
 Bitcoin in the discord, wait, what?
 
 !asset
-- not work(not solved)
+- not work(solved)
+- stored bitcoin data in data.txt
 
 !mine {nonce}
 - which mines the block
