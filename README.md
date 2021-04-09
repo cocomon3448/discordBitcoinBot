@@ -14,4 +14,4 @@ Bitcoin in the discord, wait, what?
 - shows ping
 
 
-Copyright by cocomon3448
+Copyright by cocomon3448(래머)
