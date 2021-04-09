@@ -151,14 +151,21 @@ async def ping(ctx):
         statu = 'Slow'
     await ctx.send(f'Ping is {ping} ms ({statu})')
 
-@client.command()
-async def kick(ctx, member : discord.Member,*,reason=None):
-    await member.kick(reason=reason)
-@client.command()
-async def ban(ctx, member : discord.Member,*,reason=None):
-    await member.ban(reason=reason)
-    await ctx.send(f'Banned {member.mention}')
 ###################################################################
+current_gives = 10
+def editasset(username, current_asset):
+    global current_gives
+    with open("data.txt", 'r') as infile:
+            data = infile.readlines()
+    with open("data.txt", 'w') as outfile:
+        for i in data:
+            if not i.startswith(username):
+                outfile.write(i)
+    with open("data.txt", "r+") as f:
+            old = f.read() # read everything in the file
+            f.seek(0) # rewind
+            data = "{0}:{1}".format(username, current_asset+current_gives)
+            f.write(data+"\n" + old) # write the new line before
 
 blockchain = BlockChain()
 
@@ -173,16 +180,17 @@ blockchain.new_data(
     recipient="Server I think?",  #let's send Quincy some coins!
     quantity=1,
 )
-user = ''
 last_hash = last_block.calculate_hash
 block = blockchain.construct_block(proof_no, last_hash)
 print(proof_no)
+
 newblock = True
 @client.command()
 async def mine(ctx, *,nonce):
     global newblock
     global proof_no
     global last_hash
+    user_asset = 0
     if newblock == False:
         last_block = blockchain.latest_block
         last_proof_no = last_block.proof_no
@@ -195,50 +203,49 @@ async def mine(ctx, *,nonce):
         await ctx.send('Mined Block!!')
         user_data = '{0.author.mention}'.format(ctx.message)
         print(user_data)
-        with open("data.txt", "r+") as f:
-            old = f.read() # read everything in the file
-            f.seek(0) # rewind
-            data = "{0}:1".format(user_data)
-            f.write(data+"\n" + old) # write the new line before
+        username = str(re.sub(r"[^a-zA-Z0-9]","",user_data))
+        print(username)
+        try:
+            with open('data.txt', 'r') as file:
+                for line in file:
+                    if username in line:
+                        username = [line.strip()]
+                        username = username[0].split(':')
+                        user_asset = int(username[1])
+                        editasset(str(username[0]), user_asset)
+                    elif username != line:
+                        user_asset = 0
+                        editasset(user_data, user_asset)
+        except TypeError:
+            pass
         newblock = False
     elif int(nonce) != int(proof_no):
         await ctx.send('Nope')
 
 @client.command(pass_context=True)
 async def asset(ctx,*,username):
-    global user
-    username = re.sub(r"[^a-zA-Z0-9]","",username)
-    with open('data.txt') as f:
-        lines = f.readlines()
-        user = [line.rstrip() for line in lines if line.find(username)]
-        print(user[0], username)
-    # 문제 - restrip() 작동 오류인듯하다.
-    # 문제 - list 에 split() 함수 적용이 안된다.
-    # 문제 - !asset 명령어 대안이 없다.
-    strings = user[0].split(':')
-    user = []
-    print(strings)
-    asset = str(strings[1])
-    print(asset)
-    username = '<@'+username+'>'
-    print(username, strings[0])
-    if username == strings[0]:
-        await ctx.send(f'{username}의 자산 => 비트코인 {asset}개')
+    try:
+        user = ''
+        erroruser = username
+        username = re.sub(r"[^a-zA-Z0-9]","",username)
+        print(username)
+        with open('data.txt', 'r') as file:
+            for line in file:
+                if username in line:
+                    user = [line.strip()]
+        strings = user[0].split(':')
+        user = []
+        print(strings)
+        asset = str(strings[1])
+        print(asset)
+        username = '<@'+username+'>'
+        print(username, strings[0])
+        if username == strings[0]:
+            await ctx.send(f'Asset of {username} => {asset} Bitcoin')
+    except IndexError:
+        await ctx.send(f'{str(erroruser)} is not registered?')
+        pass
     
 ###############################################################
-# @client.command()
-# async def asset(ctx.*,username):
 
-
-# @client.command()
-# async def clear(ctx, amount=3):
-#     await ctx.channel.purge(limit=amount)
-# @client.events
-# async def on_member_join(member):
-#     print(f'{member} has joined a server')
-
-# @client.event
-# async def on_member_remove(member):
-#     print(f'{member} has left server')
-
-client.run('your oauth')
+client.run('token')
