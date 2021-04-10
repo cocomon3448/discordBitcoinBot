@@ -151,6 +151,13 @@ async def ping(ctx):
         statu = 'Slow'
     await ctx.send(f'Ping is {ping} ms ({statu})')
 
+# @client.command()
+# async def kick(ctx, member : discord.Member,*,reason=None):
+#     await member.kick(reason=reason)
+# @client.command()
+# async def ban(ctx, member : discord.Member,*,reason=None):
+#     await member.ban(reason=reason)
+#     await ctx.send(f'Banned {member.mention}')
 ###################################################################
 current_gives = 10
 def editasset(username, current_asset):
@@ -176,8 +183,8 @@ last_proof_no = last_block.proof_no
 proof_no = blockchain.proof_of_work(last_proof_no)
 
 blockchain.new_data(
-    sender="0",  #it implies that this node has created a new block
-    recipient="Server I think?",  #let's send Quincy some coins!
+    sender="0", 
+    recipient="Server I think?",  
     quantity=1,
 )
 last_hash = last_block.calculate_hash
@@ -221,6 +228,10 @@ async def mine(ctx, *,nonce):
         newblock = False
     elif int(nonce) != int(proof_no):
         await ctx.send('Nope')
+        if int(nonce) > int(proof_no):
+            await ctx.send('More Less Then That!')
+        elif int(nonce) < int(proof_no):
+            await ctx.send('More Greater Then That!')
 
 @client.command(pass_context=True)
 async def asset(ctx,*,username):
@@ -241,11 +252,10 @@ async def asset(ctx,*,username):
         username = '<@'+username+'>'
         print(username, strings[0])
         if username == strings[0]:
-            await ctx.send(f'Asset of {username} => {asset} Bitcoin')
+            await ctx.send(f'{username} has {asset} Bitcoin')
     except IndexError:
-        await ctx.send(f'{str(erroruser)} is not registered?')
+        await ctx.send(f'{str(erroruser)} have no asset.')
         pass
     
-###############################################################
 
 client.run('token')
