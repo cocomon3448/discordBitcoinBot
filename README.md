@@ -4,6 +4,7 @@ Bitcoin in the discord, wait, what?
 !asset
 - not work(solved)
 - stored bitcoin data in data.txt
+- ex !asset @username
 
 !mine {nonce}
 - which mines the block
